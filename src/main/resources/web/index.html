@@ -165,6 +165,91 @@
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 3px; }
+
+
+    .bench-hero {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border: 1px solid rgba(148,163,184,.15);
+      border-radius: 16px;
+      padding: 2rem;
+      color: #f1f5f9;
+    }
+    .bench-hero h3 { font-weight: 700; letter-spacing: -.02em; }
+    .bench-hero .lead { color: #94a3b8; font-size: .95rem; }
+
+    .bench-run-btn {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: 0; color: #fff; font-weight: 600;
+      padding: .75rem 1.75rem; border-radius: 10px;
+      box-shadow: 0 8px 24px -8px rgba(139,92,246,.6);
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .bench-run-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px -8px rgba(139,92,246,.8);
+    }
+    .bench-run-btn:disabled { opacity: .7; cursor: not-allowed; }
+
+    .metric-card {
+      background: #0b1220;
+      border: 1px solid rgba(148,163,184,.12);
+      border-radius: 14px;
+      padding: 1.25rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .2s, transform .2s;
+    }
+    .metric-card:hover { border-color: rgba(148,163,184,.3); transform: translateY(-2px); }
+    .metric-card .label {
+      text-transform: uppercase; font-size: .7rem;
+      letter-spacing: .08em; color: #64748b; font-weight: 600;
+    }
+    .metric-card .value {
+      font-size: 2.25rem; font-weight: 800; line-height: 1.1;
+      margin-top: .35rem; color: #f8fafc;
+      font-variant-numeric: tabular-nums;
+    }
+    .metric-card .unit { font-size: .9rem; color: #64748b; margin-left: .25rem; font-weight: 500; }
+    .metric-card .icon {
+      position: absolute; top: 1rem; right: 1rem;
+      width: 36px; height: 36px; border-radius: 10px;
+      display: grid; place-items: center; font-size: 1.1rem;
+    }
+    .metric-card.slow  .icon { background: rgba(239,68,68,.15);  color: #f87171; }
+    .metric-card.warm  .icon { background: rgba(251,191,36,.15); color: #fbbf24; }
+    .metric-card.fast  .icon { background: rgba(34,197,94,.15);  color: #4ade80; }
+    .metric-card.gain  .icon { background: rgba(139,92,246,.18); color: #c4b5fd; }
+    .metric-card.gain .value {
+      background: linear-gradient(135deg, #c4b5fd, #f0abfc);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+
+    /* Comparativo em barras */
+    .bench-chart { background: #0b1220; border:1px solid rgba(148,163,184,.12); border-radius: 14px; padding: 1.5rem; }
+    .bench-chart h6 { color:#cbd5e1; font-weight: 600; margin-bottom: 1.25rem; }
+    .bar-row { display: grid; grid-template-columns: 140px 1fr 90px; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+    .bar-row .name { color:#e2e8f0; font-weight: 500; font-size: .9rem; display:flex; align-items:center; gap:.5rem; }
+    .bar-row .name .dot { width:10px; height:10px; border-radius: 3px; }
+    .bar-track { height: 28px; background: rgba(148,163,184,.08); border-radius: 8px; overflow: hidden; }
+    .bar-fill {
+      height: 100%; width: 0; border-radius: 8px;
+      transition: width 1s cubic-bezier(.22,1,.36,1);
+      position: relative;
+    }
+    .bar-fill.jdbc  { background: linear-gradient(90deg, #ef4444, #f97316); }
+    .bar-fill.redis { background: linear-gradient(90deg, #10b981, #22d3ee); }
+    .bar-row .ms { color:#94a3b8; font-variant-numeric: tabular-nums; text-align: right; font-size: .9rem; }
+
+    .winner-banner {
+      margin-top: 1.25rem; padding: .9rem 1.25rem;
+      background: linear-gradient(90deg, rgba(34,197,94,.12), rgba(139,92,246,.12));
+      border: 1px solid rgba(34,197,94,.3);
+      border-radius: 10px; color:#bbf7d0;
+      display:flex; align-items:center; gap:.75rem; font-weight: 500;
+    }
+
+    .bench-empty { text-align:center; padding: 3rem 1rem; color:#64748b; }
+    .bench-empty .bi { font-size: 3rem; opacity: .4; display:block; margin-bottom: .5rem; }
   </style>
 </head>
 <body>
@@ -335,59 +420,81 @@
       </div>
 
       <!-- ── Benchmark ──────────────────────────────────────────────────── -->
-      <div id="benchmark" class="section">
-        <h5 class="mb-3"><i class="bi bi-speedometer2 me-2 text-accent"></i>Teste de Desempenho</h5>
-
-        <div class="card mb-4">
-          <div class="card-body p-4">
-            <p class="text-muted small mb-3">
-              Compara a velocidade de <code>listarLivros()</code> com e sem cache Redis.
-              O resultado é mostrado abaixo e impresso no console do servidor.
-            </p>
-            <button class="btn btn-accent" onclick="executarBenchmark()">
+      <section id="benchmark" class="section">
+        <div class="bench-hero mb-4">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+              <h3 class="mb-1"><i class="bi bi-speedometer2 me-2"></i>Teste de Desempenho</h3>
+              <p class="lead mb-0">Compare a velocidade de <code>listarLivros()</code> com e sem cache Redis.</p>
+            </div>
+            <button class="bench-run-btn" onclick="executarBenchmark()">
               <i class="bi bi-play-fill me-1"></i> Executar Benchmark
             </button>
           </div>
         </div>
 
-        <div id="bench-resultado" style="display:none">
+        <div id="bench-resultado" style="display:none;">
+          <!-- Métricas -->
           <div class="row g-3 mb-4">
-            <div class="col-md-3">
-              <div class="bench-card">
-                <div class="bench-value text-accent" id="b-sem-cache">—</div>
-                <div class="bench-label">Sem cache (ms)</div>
+            <div class="col-6 col-lg-3">
+              <div class="metric-card slow">
+                <div class="icon"><i class="bi bi-database"></i></div>
+                <div class="label">Sem cache</div>
+                <div class="value"><span id="b-sem-cache">—</span><span class="unit">ms</span></div>
               </div>
             </div>
-            <div class="col-md-3">
-              <div class="bench-card">
-                <div class="bench-value text-warning" id="b-primeira-cache">—</div>
-                <div class="bench-label">1ª execução com cache (ms)</div>
+            <div class="col-6 col-lg-3">
+              <div class="metric-card warm">
+                <div class="icon"><i class="bi bi-hourglass-split"></i></div>
+                <div class="label">1ª com cache</div>
+                <div class="value"><span id="b-primeira-cache">—</span><span class="unit">ms</span></div>
               </div>
             </div>
-            <div class="col-md-3">
-              <div class="bench-card">
-                <div class="bench-value text-success-soft" id="b-com-cache">—</div>
-                <div class="bench-label">2ª execução com cache (ms)</div>
+            <div class="col-6 col-lg-3">
+              <div class="metric-card fast">
+                <div class="icon"><i class="bi bi-lightning-charge-fill"></i></div>
+                <div class="label">Cache populado</div>
+                <div class="value"><span id="b-com-cache">—</span><span class="unit">ms</span></div>
               </div>
             </div>
-            <div class="col-md-3">
-              <div class="bench-card">
-                <div class="bench-value text-info" id="b-ganho">—</div>
-                <div class="bench-label">Ganho de desempenho (%)</div>
+            <div class="col-6 col-lg-3">
+              <div class="metric-card gain">
+                <div class="icon"><i class="bi bi-graph-up-arrow"></i></div>
+                <div class="label">Ganho</div>
+                <div class="value"><span id="b-ganho">—</span></div>
               </div>
             </div>
           </div>
 
-          <div class="card">
-            <div class="card-body p-4">
-              <p class="small text-muted mb-2">JDBC direto (sem cache)</p>
-              <div class="bar-wrap"><div id="bar-jdbc" class="bar-fill" style="background:var(--accent);width:0%"></div></div>
-              <p class="small text-muted mb-2 mt-3">Redis cache (2ª execução)</p>
-              <div class="bar-wrap"><div id="bar-redis" class="bar-fill" style="background:#4caf8a;width:0%"></div></div>
+          <!-- Gráfico comparativo -->
+          <div class="bench-chart">
+            <h6><i class="bi bi-bar-chart-line me-2"></i>Comparativo visual</h6>
+
+            <div class="bar-row">
+              <div class="name"><span class="dot" style="background:#ef4444"></span>JDBC direto</div>
+              <div class="bar-track"><div class="bar-fill jdbc" id="bar-jdbc"></div></div>
+              <div class="ms"><span id="bar-jdbc-ms">—</span> ms</div>
+            </div>
+
+            <div class="bar-row">
+              <div class="name"><span class="dot" style="background:#10b981"></span>Redis cache</div>
+              <div class="bar-track"><div class="bar-fill redis" id="bar-redis"></div></div>
+              <div class="ms"><span id="bar-redis-ms">—</span> ms</div>
+            </div>
+
+            <div class="winner-banner" id="winner-banner" style="display:none;">
+              <i class="bi bi-trophy-fill" style="color:#fbbf24;"></i>
+              <span id="winner-text"></span>
             </div>
           </div>
         </div>
-      </div>
+
+        <!-- Estado vazio -->
+        <div id="bench-empty" class="bench-chart bench-empty">
+          <i class="bi bi-speedometer2"></i>
+          Clique em <strong>Executar Benchmark</strong> para comparar JDBC vs Redis.
+        </div>
+      </section>
 
       <!-- ── Cache Redis ────────────────────────────────────────────────── -->
       <div id="cache" class="section">
@@ -629,23 +736,40 @@
 
   // ── Benchmark ──────────────────────────────────────────────────────────
   async function executarBenchmark() {
-    const btn = event.target;
-    btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Executando...';
+    const btn = event.target.closest('button');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Executando...';
+    document.getElementById('bench-empty').style.display = 'none';
+
     try {
       const res  = await fetch('/api/benchmark');
       const data = await res.json();
-      document.getElementById('b-sem-cache').textContent     = data.semCacheMs;
+
+      document.getElementById('b-sem-cache').textContent      = data.semCacheMs;
       document.getElementById('b-primeira-cache').textContent = data.primeiraComCacheMs;
-      document.getElementById('b-com-cache').textContent     = data.comCacheMs;
-      document.getElementById('b-ganho').textContent         = data.ganhoPercent.toFixed(1) + '%';
+      document.getElementById('b-com-cache').textContent      = data.comCacheMs;
+      document.getElementById('b-ganho').textContent          = data.ganhoPercent.toFixed(1) + '%';
+
+      document.getElementById('bar-jdbc-ms').textContent  = data.semCacheMs;
+      document.getElementById('bar-redis-ms').textContent = data.comCacheMs;
+
       const max = Math.max(data.semCacheMs, data.comCacheMs, 1);
-      document.getElementById('bar-jdbc').style.width  = (data.semCacheMs / max * 100) + '%';
-      document.getElementById('bar-redis').style.width = (data.comCacheMs  / max * 100) + '%';
       document.getElementById('bench-resultado').style.display = 'block';
+      // dispara animação após render
+      requestAnimationFrame(() => {
+        document.getElementById('bar-jdbc').style.width  = (data.semCacheMs / max * 100) + '%';
+        document.getElementById('bar-redis').style.width = (data.comCacheMs  / max * 100) + '%';
+      });
+
+      const speedup = data.semCacheMs / Math.max(data.comCacheMs, 1);
+    } catch (e) {
+      showToast('Erro no benchmark: ' + e.message, 'danger');
     } finally {
-      btn.disabled = false; btn.innerHTML = '<i class="bi bi-play-fill me-1"></i> Executar Benchmark';
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-play-fill me-1"></i> Executar Benchmark';
     }
   }
+
 
   // ── Cache ──────────────────────────────────────────────────────────────
   async function verificarCache() {
