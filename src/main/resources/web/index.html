@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Catálogo de Livros</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --primary:   #1a1a2e;
+      --accent:    #e94560;
+      --accent2:   #0f3460;
+      --card-bg:   #16213e;
+      --text:      #eaeaea;
+      --muted:     #8892a4;
+      --border:    rgba(255,255,255,.08);
+      --radius:    12px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background: var(--primary);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Navbar ─────────────────────────────────────────── */
+    .navbar {
+      background: var(--accent2);
+      box-shadow: 0 2px 20px rgba(0,0,0,.4);
+      padding: .9rem 1.5rem;
+    }
+    .navbar-brand { font-size: 1.4rem; font-weight: 700; color: #fff !important; }
+    .navbar-brand i { color: var(--accent); margin-right: .4rem; }
+
+    /* ── Sidebar / Tabs ─────────────────────────────────── */
+    .sidebar {
+      background: var(--card-bg);
+      border-right: 1px solid var(--border);
+      min-height: calc(100vh - 58px);
+      padding: 1.5rem 1rem;
+    }
+    .nav-pills .nav-link {
+      color: var(--muted);
+      border-radius: 8px;
+      padding: .65rem 1rem;
+      margin-bottom: .3rem;
+      font-size: .92rem;
+      transition: all .2s;
+    }
+    .nav-pills .nav-link:hover  { background: rgba(255,255,255,.07); color: var(--text); }
+    .nav-pills .nav-link.active { background: var(--accent); color: #fff; }
+    .nav-pills .nav-link i      { margin-right: .5rem; width: 18px; text-align: center; }
+
+    /* ── Main content ───────────────────────────────────── */
+    .main-content { padding: 2rem; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* ── Cards ──────────────────────────────────────────── */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .card-header {
+      background: transparent;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      font-size: .95rem;
+      padding: 1rem 1.25rem;
+    }
+
+    /* ── Tabela de livros ───────────────────────────────── */
+    .table { color: var(--text); margin: 0; }
+    .table thead th {
+      background: rgba(255,255,255,.04);
+      border-color: var(--border);
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      padding: .85rem 1rem;
+    }
+    .table tbody td {
+      border-color: var(--border);
+      padding: .85rem 1rem;
+      vertical-align: middle;
+      font-size: .9rem;
+    }
+    .table tbody tr:hover { background: rgba(255,255,255,.03); }
+
+    .badge-cat {
+      background: rgba(233,69,96,.15);
+      color: var(--accent);
+      border: 1px solid rgba(233,69,96,.3);
+      padding: .3em .7em;
+      border-radius: 20px;
+      font-size: .75rem;
+    }
+
+    /* ── Form ───────────────────────────────────────────── */
+    .form-control, .form-select {
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+    }
+    .form-control:focus, .form-select:focus {
+      background: rgba(255,255,255,.08);
+      border-color: var(--accent);
+      color: var(--text);
+      box-shadow: 0 0 0 3px rgba(233,69,96,.15);
+    }
+    .form-control::placeholder { color: var(--muted); }
+    .form-label { font-size: .85rem; color: var(--muted); margin-bottom: .35rem; }
+    .form-select option { background: #1a1a2e; }
+
+    /* ── Botões ─────────────────────────────────────────── */
+    .btn-accent   { background: var(--accent); color: #fff; border: none; }
+    .btn-accent:hover { background: #c73652; color: #fff; }
+    .btn-outline-accent { border-color: var(--accent); color: var(--accent); }
+    .btn-outline-accent:hover { background: var(--accent); color: #fff; }
+
+    /* ── Benchmark ──────────────────────────────────────── */
+    .bench-card {
+      text-align: center;
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+    }
+    .bench-value { font-size: 2.2rem; font-weight: 700; line-height: 1; }
+    .bench-label { font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+    .text-accent  { color: var(--accent) !important; }
+    .text-success-soft { color: #4caf8a !important; }
+
+    .bar-wrap { height: 12px; background: rgba(255,255,255,.07); border-radius: 6px; overflow: hidden; margin-top: .5rem; }
+    .bar-fill { height: 100%; border-radius: 6px; transition: width .8s ease; }
+
+    /* ── Cache status pill ──────────────────────────────── */
+    .pill-on  { background: rgba(76,175,138,.15); color:#4caf8a; border:1px solid rgba(76,175,138,.35); padding:.3em .8em; border-radius:20px; font-size:.78rem; }
+    .pill-off { background: rgba(233,69,96,.15);  color:var(--accent); border:1px solid rgba(233,69,96,.35); padding:.3em .8em; border-radius:20px; font-size:.78rem; }
+
+    /* ── Toast ──────────────────────────────────────────── */
+    .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; }
+
+    /* ── Loading spinner overlay ────────────────────────── */
+    .spinner-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.5);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9998;
+    }
+
+    /* ── Scrollbar ──────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- ══ Navbar ══════════════════════════════════════════════════════════════ -->
+<nav class="navbar navbar-expand-lg">
+  <span class="navbar-brand"><i class="bi bi-book-fill"></i>Catálogo de Livros</span>
+  <span class="ms-auto text-muted small">Java + JDBC + JPA + Redis</span>
+</nav>
+
+<div class="container-fluid">
+  <div class="row">
+
+    <!-- ══ Sidebar ═══════════════════════════════════════════════════════ -->
+    <div class="col-md-2 sidebar d-none d-md-block">
+      <ul class="nav nav-pills flex-column">
+        <li class="nav-item">
+          <a class="nav-link active" href="#" onclick="showSection('catalogo')">
+            <i class="bi bi-grid-fill"></i> Catálogo
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="showSection('adicionar')">
+            <i class="bi bi-plus-circle-fill"></i> Adicionar
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="showSection('buscar')">
+            <i class="bi bi-search"></i> Buscar
+          </a>
+        </li>
+        <li class="nav-item mt-3">
+          <a class="nav-link" href="#" onclick="showSection('benchmark')">
+            <i class="bi bi-speedometer2"></i> Benchmark
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="showSection('cache')">
+            <i class="bi bi-lightning-fill"></i> Cache Redis
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ══ Conteúdo principal ════════════════════════════════════════════ -->
+    <div class="col-md-10 main-content">
+
+      <!-- ── Catálogo ─────────────────────────────────────────────────── -->
+      <div id="catalogo" class="section active">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h5 class="mb-0"><i class="bi bi-grid-fill me-2 text-accent"></i>Todos os Livros</h5>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="carregarLivros('jdbc')">
+              <i class="bi bi-database"></i> Via JDBC
+            </button>
+            <button class="btn btn-sm btn-outline-warning" onclick="carregarLivros('cache')">
+              <i class="bi bi-lightning"></i> Via Cache
+            </button>
+            <button class="btn btn-sm btn-accent" onclick="carregarLivros('jpa')">
+              <i class="bi bi-arrow-clockwise"></i> Via JPA
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span id="total-livros">Carregando...</span>
+            <span id="fonte-badge" class="badge bg-secondary">JPA/Hibernate</span>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Título</th>
+                  <th>Autor</th>
+                  <th>Ano</th>
+                  <th>Categoria</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tabela-livros">
+                <tr><td colspan="6" class="text-center py-4 text-muted">Carregando livros...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Adicionar ─────────────────────────────────────────────────── -->
+      <div id="adicionar" class="section">
+        <h5 class="mb-3"><i class="bi bi-plus-circle-fill me-2 text-accent"></i>Adicionar Livro</h5>
+        <div class="card" style="max-width:560px">
+          <div class="card-body p-4">
+            <div class="mb-3">
+              <label class="form-label">Título *</label>
+              <input id="f-titulo" type="text" class="form-control" placeholder="Ex: Dom Casmurro"/>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Autor *</label>
+              <input id="f-autor" type="text" class="form-control" placeholder="Ex: Machado de Assis"/>
+            </div>
+            <div class="row">
+              <div class="col-6 mb-3">
+                <label class="form-label">Ano de Publicação</label>
+                <input id="f-ano" type="number" class="form-control" placeholder="Ex: 1899"/>
+              </div>
+              <div class="col-6 mb-3">
+                <label class="form-label">Categoria</label>
+                <select id="f-categoria" class="form-select">
+                  <option value="">Selecione...</option>
+                  <option>Romance</option>
+                  <option>Ficção Científica</option>
+                  <option>Fantasia</option>
+                  <option>Terror</option>
+                  <option>Técnico</option>
+                  <option>História</option>
+                  <option>Biografia</option>
+                  <option>Autoajuda</option>
+                  <option>Outro</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-accent w-100" onclick="salvarLivro()">
+              <i class="bi bi-save me-1"></i> Salvar Livro
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Buscar ─────────────────────────────────────────────────────── -->
+      <div id="buscar" class="section">
+        <h5 class="mb-3"><i class="bi bi-search me-2 text-accent"></i>Buscar Livros</h5>
+        <div class="card mb-3" style="max-width:560px">
+          <div class="card-body p-4">
+            <div class="mb-3">
+              <label class="form-label">Buscar por Autor</label>
+              <div class="input-group">
+                <input id="b-autor" type="text" class="form-control" placeholder="Nome do autor..."/>
+                <button class="btn btn-accent" onclick="buscarPorAutor()">
+                  <i class="bi bi-search"></i>
+                </button>
+              </div>
+            </div>
+            <div>
+              <label class="form-label">Buscar por Categoria</label>
+              <div class="input-group">
+                <input id="b-categoria" type="text" class="form-control" placeholder="Categoria..."/>
+                <button class="btn btn-accent" onclick="buscarPorCategoria()">
+                  <i class="bi bi-search"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header" id="busca-titulo">Resultados</div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead><tr><th>#</th><th>Título</th><th>Autor</th><th>Ano</th><th>Categoria</th></tr></thead>
+              <tbody id="tabela-busca">
+                <tr><td colspan="5" class="text-center py-4 text-muted">Use os filtros acima</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Benchmark ──────────────────────────────────────────────────── -->
+      <div id="benchmark" class="section">
+        <h5 class="mb-3"><i class="bi bi-speedometer2 me-2 text-accent"></i>Teste de Desempenho</h5>
+
+        <div class="card mb-4">
+          <div class="card-body p-4">
+            <p class="text-muted small mb-3">
+              Compara a velocidade de <code>listarLivros()</code> com e sem cache Redis.
+              O resultado é mostrado abaixo e impresso no console do servidor.
+            </p>
+            <button class="btn btn-accent" onclick="executarBenchmark()">
+              <i class="bi bi-play-fill me-1"></i> Executar Benchmark
+            </button>
+          </div>
+        </div>
+
+        <div id="bench-resultado" style="display:none">
+          <div class="row g-3 mb-4">
+            <div class="col-md-3">
+              <div class="bench-card">
+                <div class="bench-value text-accent" id="b-sem-cache">—</div>
+                <div class="bench-label">Sem cache (ms)</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="bench-card">
+                <div class="bench-value text-warning" id="b-primeira-cache">—</div>
+                <div class="bench-label">1ª execução com cache (ms)</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="bench-card">
+                <div class="bench-value text-success-soft" id="b-com-cache">—</div>
+                <div class="bench-label">2ª execução com cache (ms)</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="bench-card">
+                <div class="bench-value text-info" id="b-ganho">—</div>
+                <div class="bench-label">Ganho de desempenho (%)</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body p-4">
+              <p class="small text-muted mb-2">JDBC direto (sem cache)</p>
+              <div class="bar-wrap"><div id="bar-jdbc" class="bar-fill" style="background:var(--accent);width:0%"></div></div>
+              <p class="small text-muted mb-2 mt-3">Redis cache (2ª execução)</p>
+              <div class="bar-wrap"><div id="bar-redis" class="bar-fill" style="background:#4caf8a;width:0%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Cache Redis ────────────────────────────────────────────────── -->
+      <div id="cache" class="section">
+        <h5 class="mb-3"><i class="bi bi-lightning-fill me-2 text-accent"></i>Gerenciar Cache Redis</h5>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-4">
+            <div class="card h-100">
+              <div class="card-body p-4">
+                <p class="text-muted small mb-2">Status atual</p>
+                <div id="cache-status-badge"><span class="pill-off"><i class="bi bi-x-circle me-1"></i>Desconhecido</span></div>
+                <div class="mt-2 small text-muted">TTL restante: <span id="cache-ttl">—</span>s</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card h-100">
+              <div class="card-body p-4 d-flex flex-column justify-content-between">
+                <p class="text-muted small mb-2">Ações</p>
+                <div class="d-flex flex-column gap-2">
+                  <button class="btn btn-sm btn-outline-warning" onclick="verificarCache()">
+                    <i class="bi bi-arrow-clockwise me-1"></i> Verificar status
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="invalidarCache()">
+                    <i class="bi bi-trash me-1"></i> Invalidar cache
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card h-100">
+              <div class="card-body p-4">
+                <p class="text-muted small mb-2">Popular cache</p>
+                <p class="small" style="color:var(--muted)">Faça uma requisição via Cache para popular automaticamente o Redis.</p>
+                <button class="btn btn-sm btn-accent" onclick="popularCache()">
+                  <i class="bi bi-lightning me-1"></i> Buscar via Cache
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><i class="bi bi-info-circle me-2"></i>Como funciona o cache</div>
+          <div class="card-body p-4">
+            <ol class="mb-0" style="color:var(--muted); font-size:.9rem; line-height:1.9">
+              <li>A classe <code>LivroCache.listarLivros()</code> verifica se a chave <code>livros:todos</code> existe no Redis.</li>
+              <li>Se existir (<strong>cache hit</strong>), desserializa o JSON e retorna imediatamente.</li>
+              <li>Se não existir (<strong>cache miss</strong>), consulta o PostgreSQL via JDBC.</li>
+              <li>O resultado é serializado em JSON e armazenado no Redis com TTL de 60 segundos.</li>
+              <li>Operações de escrita (criar, atualizar, deletar) invalidam o cache automaticamente.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /col -->
+  </div><!-- /row -->
+</div><!-- /container -->
+
+<!-- ══ Toast ══════════════════════════════════════════════════════════════ -->
+<div class="toast-container">
+  <div id="toast" class="toast align-items-center text-white border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body" id="toast-msg">Mensagem</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal editar -->
+<div class="modal fade" id="modalEditar" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content" style="background:var(--card-bg);color:var(--text)">
+      <div class="modal-header" style="border-color:var(--border)">
+        <h6 class="modal-title">Editar Livro</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="e-id"/>
+        <div class="mb-3"><label class="form-label">Título</label>
+          <input id="e-titulo" type="text" class="form-control"/></div>
+        <div class="mb-3"><label class="form-label">Autor</label>
+          <input id="e-autor" type="text" class="form-control"/></div>
+        <div class="row">
+          <div class="col-6 mb-3"><label class="form-label">Ano</label>
+            <input id="e-ano" type="number" class="form-control"/></div>
+          <div class="col-6 mb-3"><label class="form-label">Categoria</label>
+            <input id="e-categoria" type="text" class="form-control"/></div>
+        </div>
+      </div>
+      <div class="modal-footer" style="border-color:var(--border)">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-accent" onclick="salvarEdicao()">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const BASE = '';  // mesma origem
+
+  // ── Navegação ─────────────────────────────────────────────────────────
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    event.target.closest('.nav-link').classList.add('active');
+    if (id === 'catalogo') carregarLivros('jpa');
+    if (id === 'cache')    verificarCache();
+  }
+
+  // ── Toast ──────────────────────────────────────────────────────────────
+  function showToast(msg, tipo='success') {
+    const el = document.getElementById('toast');
+    el.className = `toast align-items-center text-white border-0 bg-${tipo === 'success' ? 'success' : 'danger'}`;
+    document.getElementById('toast-msg').textContent = msg;
+    bootstrap.Toast.getOrCreateInstance(el, {delay: 3000}).show();
+  }
+
+  // ── Carregar livros ────────────────────────────────────────────────────
+  async function carregarLivros(fonte = 'jpa') {
+    const urlMap = { jpa: '/api/livros', jdbc: '/api/livros/jdbc', cache: '/api/livros/cache' };
+    const labelMap = { jpa: 'JPA/Hibernate', jdbc: 'JDBC Puro', cache: 'Redis Cache' };
+    const tbody = document.getElementById('tabela-livros');
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2"></div>Carregando...</td></tr>';
+    document.getElementById('fonte-badge').textContent = labelMap[fonte];
+
+    try {
+      const res  = await fetch(urlMap[fonte]);
+      const data = await res.json();
+      document.getElementById('total-livros').textContent = `${data.length} livro(s) encontrado(s)`;
+      tbody.innerHTML = data.length === 0
+        ? '<tr><td colspan="6" class="text-center py-4 text-muted">Nenhum livro cadastrado</td></tr>'
+        : data.map(l => `
+          <tr>
+            <td><span class="text-muted">${l.id}</span></td>
+            <td><strong>${esc(l.titulo)}</strong></td>
+            <td>${esc(l.autor)}</td>
+            <td>${l.ano_publicacao || '—'}</td>
+            <td><span class="badge-cat">${esc(l.categoria || '—')}</span></td>
+            <td>
+              <button class="btn btn-sm btn-outline-light me-1" onclick='abrirEditar(${JSON.stringify(l)})'>
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deletar(${l.id})">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>`).join('');
+    } catch(e) {
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Erro: ${e.message}</td></tr>`;
+    }
+  }
+
+  // ── Salvar novo livro ──────────────────────────────────────────────────
+  async function salvarLivro() {
+    const titulo    = document.getElementById('f-titulo').value.trim();
+    const autor     = document.getElementById('f-autor').value.trim();
+    const ano       = document.getElementById('f-ano').value;
+    const categoria = document.getElementById('f-categoria').value;
+    if (!titulo || !autor) { showToast('Título e Autor são obrigatórios', 'danger'); return; }
+
+    const res = await fetch('/api/livros', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titulo, autor, ano_publicacao: ano ? +ano : null, categoria })
+    });
+    if (res.ok) {
+      showToast('Livro salvo com sucesso!');
+      ['f-titulo','f-autor','f-ano'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('f-categoria').value = '';
+    } else { showToast('Erro ao salvar livro', 'danger'); }
+  }
+
+  // ── Editar ─────────────────────────────────────────────────────────────
+  function abrirEditar(l) {
+    document.getElementById('e-id').value       = l.id;
+    document.getElementById('e-titulo').value   = l.titulo;
+    document.getElementById('e-autor').value    = l.autor;
+    document.getElementById('e-ano').value      = l.ano_publicacao || '';
+    document.getElementById('e-categoria').value = l.categoria || '';
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('modalEditar')).show();
+  }
+  async function salvarEdicao() {
+    const id = document.getElementById('e-id').value;
+    const payload = {
+      titulo:        document.getElementById('e-titulo').value,
+      autor:         document.getElementById('e-autor').value,
+      ano_publicacao: +document.getElementById('e-ano').value || null,
+      categoria:     document.getElementById('e-categoria').value
+    };
+    const res = await fetch(`/api/livros/${id}`, {
+      method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
+    });
+    bootstrap.Modal.getInstance(document.getElementById('modalEditar')).hide();
+    if (res.ok) { showToast('Livro atualizado!'); carregarLivros('jpa'); }
+    else { showToast('Erro ao atualizar', 'danger'); }
+  }
+
+  // ── Deletar ────────────────────────────────────────────────────────────
+  async function deletar(id) {
+    if (!confirm('Remover este livro?')) return;
+    const res = await fetch(`/api/livros/${id}`, { method: 'DELETE' });
+    if (res.ok) { showToast('Livro removido.'); carregarLivros('jpa'); }
+    else { showToast('Erro ao remover', 'danger'); }
+  }
+
+  // ── Busca ──────────────────────────────────────────────────────────────
+  async function buscarPorAutor() {
+    const autor = document.getElementById('b-autor').value.trim();
+    if (!autor) return;
+    const res  = await fetch(`/api/livros/autor/${encodeURIComponent(autor)}`);
+    const data = await res.json();
+    document.getElementById('busca-titulo').textContent = `${data.length} resultado(s) para autor: "${autor}"`;
+    renderBusca(data);
+  }
+  async function buscarPorCategoria() {
+    const cat = document.getElementById('b-categoria').value.trim();
+    if (!cat) return;
+    const res  = await fetch(`/api/livros/categoria/${encodeURIComponent(cat)}`);
+    const data = await res.json();
+    document.getElementById('busca-titulo').textContent = `${data.length} resultado(s) para categoria: "${cat}"`;
+    renderBusca(data);
+  }
+  function renderBusca(data) {
+    const tbody = document.getElementById('tabela-busca');
+    tbody.innerHTML = data.length === 0
+      ? '<tr><td colspan="5" class="text-center py-4 text-muted">Nenhum resultado</td></tr>'
+      : data.map(l => `<tr>
+          <td>${l.id}</td><td><strong>${esc(l.titulo)}</strong></td>
+          <td>${esc(l.autor)}</td>
+          <td>${l.ano_publicacao || '—'}</td>
+          <td><span class="badge-cat">${esc(l.categoria||'—')}</span></td>
+        </tr>`).join('');
+  }
+
+  // ── Benchmark ──────────────────────────────────────────────────────────
+  async function executarBenchmark() {
+    const btn = event.target;
+    btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Executando...';
+    try {
+      const res  = await fetch('/api/benchmark');
+      const data = await res.json();
+      document.getElementById('b-sem-cache').textContent     = data.semCacheMs;
+      document.getElementById('b-primeira-cache').textContent = data.primeiraComCacheMs;
+      document.getElementById('b-com-cache').textContent     = data.comCacheMs;
+      document.getElementById('b-ganho').textContent         = data.ganhoPercent.toFixed(1) + '%';
+      const max = Math.max(data.semCacheMs, data.comCacheMs, 1);
+      document.getElementById('bar-jdbc').style.width  = (data.semCacheMs / max * 100) + '%';
+      document.getElementById('bar-redis').style.width = (data.comCacheMs  / max * 100) + '%';
+      document.getElementById('bench-resultado').style.display = 'block';
+    } finally {
+      btn.disabled = false; btn.innerHTML = '<i class="bi bi-play-fill me-1"></i> Executar Benchmark';
+    }
+  }
+
+  // ── Cache ──────────────────────────────────────────────────────────────
+  async function verificarCache() {
+    const res  = await fetch('/api/cache/status');
+    const data = await res.json();
+    const badge = document.getElementById('cache-status-badge');
+    badge.innerHTML = data.ativo
+      ? '<span class="pill-on"><i class="bi bi-check-circle me-1"></i>Ativo</span>'
+      : '<span class="pill-off"><i class="bi bi-x-circle me-1"></i>Inativo</span>';
+    document.getElementById('cache-ttl').textContent = data.ativo ? data.ttlRestante : '—';
+  }
+  async function invalidarCache() {
+    await fetch('/api/cache', { method: 'DELETE' });
+    showToast('Cache invalidado!');
+    verificarCache();
+  }
+  async function popularCache() {
+    await fetch('/api/livros/cache');
+    showToast('Cache populado via Redis!');
+    verificarCache();
+  }
+
+  // ── Util ───────────────────────────────────────────────────────────────
+  function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // Init
+  carregarLivros('jpa');
+</script>
+</body>
+</html>
