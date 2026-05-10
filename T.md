@@ -56,11 +56,8 @@ Edite **`src/main/resources/META-INF/persistence.xml`** com as mesmas credenciai
 ## ▶️ Executar
 
 ```bash
-# Compilar e empacotar
-mvn clean package -q
-
-# Executar
-java -jar target/catalogo-livros-1.0-SNAPSHOT.jar
+# Compilar e executar
+mvn compile exec:java -Dexec.mainClass=Main
 ```
 
 Acesse a interface em: **http://localhost:7000**
