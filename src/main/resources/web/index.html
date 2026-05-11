@@ -15,6 +15,7 @@
       --primary:   #1a1a2e;
       --accent:    #e94560;
       --accent2:   #0f3460;
+      --accent3:    #e0cc10;
       --card-bg:   #16213e;
       --text:      #eaeaea;
       --muted:     #8892a4;
@@ -250,6 +251,18 @@
 
     .bench-empty { text-align:center; padding: 3rem 1rem; color:#64748b; }
     .bench-empty .bi { font-size: 3rem; opacity: .4; display:block; margin-bottom: .5rem; }
+    
+    .btn-edit {
+      border: 1px solid rgba(0, 0, 0, 0.781);
+      color: #111111;
+      background: rgba(255,255,255,.03);
+    }
+
+    .btn-edit:hover {
+      background: var(--accent3);
+      border-color: var(--accent3);
+      color: rgb(0, 0, 0);
+    }
   </style>
 </head>
 <body>
@@ -639,7 +652,7 @@
             <td>${l.ano_publicacao || '—'}</td>
             <td><span class="badge-cat">${esc(l.categoria || '—')}</span></td>
             <td>
-              <button class="btn btn-sm btn-outline-light me-1" onclick='abrirEditar(${JSON.stringify(l)})'>
+              <button class="btn btn-sm btn-edit me-1" onclick='abrirEditar(${JSON.stringify(l)})'>
                 <i class="bi bi-pencil"></i>
               </button>
               <button class="btn btn-sm btn-outline-danger" onclick="deletar(${l.id})">
